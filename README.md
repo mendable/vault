@@ -12,7 +12,7 @@ This is entirely experimental at this stage, not ready for real use.
 
 - run `bundle install`
 
-- run `rake spec` to test
+- run `RACK_ENV=test rake spec` to test
 
 - run `rackup` to start local server
 

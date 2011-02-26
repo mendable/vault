@@ -41,32 +41,51 @@ module Vault
 
     # Card.build
     get '/cards/new.xml' do
+      Card.new.to_xml
     end
 
     # Create
     post '/cards.xml' do
+      card_params = Hash.from_xml(request.body.read)['card']
+
+      c = Card.new(card_params)
+      if c.save then
+        response.status = 201
+        response['Location'] = "/cards/#{c.id}.xml"
+        c.to_xml
+      else
+        response.status = 422
+        c.errors.to_xml
+      end
     end
 
     # Read
     get '/cards/:id.xml' do
-      Shop.find_by_id(params['id']).try(:to_xml) || not_found
+      Card.find_by_id(params[:id]).try(:to_xml) || not_found
     end
 
     # Update
-    put '/cards/:id.xml' do      
+    put '/cards/:id.xml' do
+      card_params = Hash.from_xml(request.body.read)['card']
+
+      card = Card.find_by_id(params[:id])
+      return not_found unless card
+
+      if card.update_attributes(card_params) then
+        response.status = 204
+        return ""
+      else
+        response.status = 422
+        card.errors.to_xml
+      end
     end
 
     # Destroy
     delete '/cards/:id.xml' do
-    end
-
-    post '/cards/:id/authorize.xml' do      
-    end
-
-    post '/cards/:id/authorize_and_capture.xml' do
-    end
-
-    post '/cards/:id/capture.xml' do
+      card = Card.find_by_id(params[:id])
+      return not_found unless card
+      card.destroy
+      ""
     end
   end
 end

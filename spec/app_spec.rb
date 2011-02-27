@@ -24,13 +24,15 @@ describe Vault::App do
 
 
   specify "POST '/cards.xml' - valid card" do
-    card = Card.new(:number => '123')
-    post '/cards.xml', card.to_xml
+    post '/cards.xml', Factory.build(:card).to_xml
 
     t = TestCard.new.send(:load_attributes_from_response, last_response)
     t.should_not be_nil
 
-    t.attributes.should == Card.last.attributes
+    card = Card.last
+    %w(id issue_number month number start_month start_year year).each do |attr|
+      card.send(attr).should == t.send(attr)
+    end
     t.id.should == Card.last.id
 
     last_response.status.should == 201 #:created in rails
@@ -44,7 +46,7 @@ describe Vault::App do
     r = ActiveResource::Errors.from_xml(last_response.body)
     r.should_not be_empty
     r['errors'].should_not be_empty
-    r['errors']['error'].should == "Number can't be blank"
+    r['errors']['error'].should include "Number can't be blank"
 
     last_response.status.should == 422
     last_response.location.should be_nil
@@ -58,31 +60,33 @@ describe Vault::App do
     end
 
     specify "when found" do
-      db = Card.create!(:number => '12345')
+      db = Factory(:card)
       get "/cards/#{db.id}.xml"
       last_response.status.should == 200
       t = TestCard.new.send(:load_attributes_from_response, last_response)
-      t.attributes.should == db.reload.attributes
+      %w(id issue_number month number start_month start_year year).each do |attr|
+        Card.last.send(attr).should == t.send(attr)
+      end
     end
   end
   
   
   context "PUT /cards/:id.xml" do
     specify "when valid" do
-      card = Card.create!(:number => '2222').reload
-      card.number = '555'
+      card = Factory(:card, :number => '1234567812345678').reload
+      card.number = '1234123412341234'
       put "/cards/#{card.id}.xml", card.to_xml
 
-      card.reload.number.should == '555'
+      card.reload.real_number.should == '1234123412341234'
       last_response.status.should == 204
     end
 
     specify "when invalid" do
-      card = Card.create!(:number => '2222').reload
+      card = Factory(:card, :number => '1234567812345678').reload
       card.number = ''
       put "/cards/#{card.id}.xml", card.to_xml
       
-      card.reload.number.should == '2222' # not changed
+      card.reload.real_number.should == '1234567812345678' # not changed
       last_response.status.should == 422
     end
   end
@@ -90,7 +94,7 @@ describe Vault::App do
 
   context "DELETE /cards/:id.xml" do
     specify "should work" do
-      card = Card.create!(:number => '2222').reload
+      card = Factory(:card).reload
 
       delete "/cards/#{card.id}.xml"
       

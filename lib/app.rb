@@ -52,7 +52,7 @@ module Vault
       if c.save then
         response.status = 201
         response['Location'] = "/cards/#{c.id}.xml"
-        c.to_xml
+        c.to_safe_xml
       else
         response.status = 422
         c.errors.to_xml
@@ -61,7 +61,7 @@ module Vault
 
     # Read
     get '/cards/:id.xml' do
-      Card.find_by_id(params[:id]).try(:to_xml) || not_found
+      Card.find_by_id(params[:id]).try(:to_safe_xml) || not_found
     end
 
     # Update

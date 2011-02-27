@@ -12,7 +12,7 @@ class Card < ActiveRecord::Base
   # need to read the real value from the real_number field, but attach errors to
   # the masked number field so the client API can pick them up correctly.
   validates_each :number do |record, attribute, value|
-    record.errors[attribute] << "Number can't be blank" if record.real_number.blank?
+    record.errors[attribute] << "can't be blank" if record.real_number.blank?
   end
 
   # Expiry Date validations. It is permissable for card expiry dates to be this
@@ -35,24 +35,26 @@ class Card < ActiveRecord::Base
     end
   end
 
-  # Override to_xml, it directly reads the attributes and by-passes our masking 
-  # methods. Remove the direct read of the attribute, but add the same-named
-  # method to the XML to keep the XML API consistent.
-  def to_xml(options = {}, &block)
-    super(options.merge(:except => [:number], :methods => [:number]), &block)
+  # provide "safe" implementation of standard to_xml, it directly reads the 
+  # attributes and by-passes our masking methods. Remove the direct read of
+  # the attribute, but add the same-named method to the XML to keep the XML
+  # API consistent.
+  def to_safe_xml(options = {}, &block)
+    to_xml(options.merge(:except => [:number], :methods => [:number]), &block)
   end
 
   # Number takes the real credit card number and masks on top of it, so that
   # only the last 4 digits are returned, the rest of the digits padded with *
   def number
-    t = (read_attribute(:number) || "")
+    t = read_attribute(:number)
+    return nil unless t
      ('*' * 12) + (t[t.size-4..t.size] || '')
   end
 
   # When acccepting the credit card number, be permissable of any weird user 
   # input - only read in 0-9 numbers.
   def number=(num)
-    write_attribute(:number, num ? num.scan(/\d+/).join : nil)
+    write_attribute(:number, num.blank? ? nil : num.scan(/\d+/).join)
   end
 
   # This method provides access to the real credit card number in decrypted

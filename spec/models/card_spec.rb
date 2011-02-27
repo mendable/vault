@@ -119,11 +119,11 @@ describe Card do
     specify "should validate presence of real_number" do
       @card = Card.new(:number => nil)
       @card.valid?
-      @card.errors[:number].should include "Number can't be blank"
+      @card.errors[:number].should include "can't be blank"
 
       @card.number = '234'
       @card.valid?
-      @card.errors[:number].should_not include "Number can't be blank"
+      @card.errors[:number].should_not include "can't be blank"
     end
 
     specify "assigning number should strip out all non-numeric digits to be tolerant of user input" do
@@ -145,11 +145,11 @@ describe Card do
     end
   end
 
-  context "to_xml" do
+  context "to_safe_xml" do
     specify "should never include the full credit card number, only the masked" do
       @card = Card.new(:number => '1111222233334444')
-      @card.to_xml.should_not match /1111222233334444/i
-      @card.to_xml.should match /\*\*\*\*\*\*\*\*\*\*\*\*4444/i
+      @card.to_safe_xml.should_not match /1111222233334444/i
+      @card.to_safe_xml.should match /\*\*\*\*\*\*\*\*\*\*\*\*4444/i
     end
   end
 

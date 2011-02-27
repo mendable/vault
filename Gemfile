@@ -14,6 +14,7 @@ group :test do
   gem 'activesupport', :require => 'active_support'
   gem 'rspec'
   gem 'shoulda'
+  gem 'factory_girl'
   gem 'rack-test', :require => "rack/test"
 end
 

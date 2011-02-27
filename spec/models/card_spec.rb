@@ -126,6 +126,12 @@ describe Card do
       @card.errors[:number].should_not include "Number can't be blank"
     end
 
+    specify "assigning number should strip out all non-numeric digits to be tolerant of user input" do
+      @card = Card.new(:number => ' 999912 ttas!3$~+-4 ')
+      @card.number.should == '************1234'
+      @card.real_number.should == '99991234'
+    end
+
     specify "when regular length number is entered, number method never returns it again in full" do
       @card = Card.new(:number => '1234123412345678')
       @card.number.should == '************5678'

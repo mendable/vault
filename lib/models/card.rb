@@ -49,6 +49,12 @@ class Card < ActiveRecord::Base
      ('*' * 12) + (t[t.size-4..t.size] || '')
   end
 
+  # When acccepting the credit card number, be permissable of any weird user 
+  # input - only read in 0-9 numbers.
+  def number=(num)
+    write_attribute(:number, num ? num.scan(/\d+/).join : nil)
+  end
+
   # This method provides access to the real credit card number in decrypted
   # form. This should never be exposed back to the application in full, ever.
   def real_number

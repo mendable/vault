@@ -73,20 +73,20 @@ describe Vault::App do
   
   context "PUT /cards/:id.xml" do
     specify "when valid" do
-      card = Factory(:card, :number => '1234567812345678').reload
-      card.number = '1234123412341234'
+      card = Factory(:card).reload
+      card.number = '4111111111111111'
       put "/cards/#{card.id}.xml", card.to_xml
 
-      card.reload.real_number.should == '1234123412341234'
+      card.reload.real_number.should == '4111111111111111'
       last_response.status.should == 204
     end
 
     specify "when invalid" do
-      card = Factory(:card, :number => '1234567812345678').reload
+      card = Factory(:card).reload
       card.number = ''
       put "/cards/#{card.id}.xml", card.to_xml
       
-      card.reload.real_number.should == '1234567812345678' # not changed
+      card.reload.real_number.should == Factory.build(:card).real_number
       last_response.status.should == 422
     end
   end

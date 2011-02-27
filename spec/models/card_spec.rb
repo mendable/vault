@@ -126,6 +126,18 @@ describe Card do
       @card.errors[:number].should_not include "can't be blank"
     end
 
+    specify "should use logic from ActiveMerchant to determine validity of credit card number" do
+      number = ('5454' * 4)
+      @card = Card.new(:number => number)
+      ActiveMerchant::Billing::CreditCard.should_receive(:valid_number?).once.with(number).and_return(true)
+      @card.valid?
+      @card.errors[:number].should_not include "invalid"
+
+      ActiveMerchant::Billing::CreditCard.should_receive(:valid_number?).once.with(number).and_return(false)
+      @card.valid?
+      @card.errors[:number].should include "invalid"
+    end
+
     specify "assigning number should strip out all non-numeric digits to be tolerant of user input" do
       @card = Card.new(:number => ' 999912 ttas!3$~+-4 ')
       @card.number.should == '************1234'

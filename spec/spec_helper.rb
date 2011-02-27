@@ -9,5 +9,6 @@ Factory.define(:card) do |card|
 end
 
 RSpec.configure do |config|
+  config.mock_with :rspec
   config.include Rack::Test::Methods
 end

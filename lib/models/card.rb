@@ -8,11 +8,17 @@ class Card < ActiveRecord::Base
   validates :start_month, :inclusion => {:in => [nil, 1,2,3,4,5,6,7,8,9,10,11,12] }
   validates :start_year, :numericality => true, :allow_nil => true
 
-  # Validate presence of credit card number. Not a regular validation because we
-  # need to read the real value from the real_number field, but attach errors to
-  # the masked number field so the client API can pick them up correctly.
+
   validates_each :number do |record, attribute, value|
+    # Validate presence of credit card number. Not a regular validation because we
+    # need to read the real value from the real_number field, but attach errors to
+    # the masked number field so the client API can pick them up correctly.
     record.errors[attribute] << "can't be blank" if record.real_number.blank?
+
+    # Validate format of card number. This performs a LUHN Check and also validates
+    # the length of the card number. Rely on ActiveMerchant to provide this functionality
+    # rather than attempting to re-implement ourselves.
+    record.errors[attribute] << "invalid" if !ActiveMerchant::Billing::CreditCard.valid_number?(record.real_number)
   end
 
   # Expiry Date validations. It is permissable for card expiry dates to be this

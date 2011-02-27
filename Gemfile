@@ -7,6 +7,7 @@ gem 'builder'
 gem 'sam-mysql-ruby'
 gem 'activerecord', :require => 'active_record'
 gem 'activeresource', :require => 'active_resource'
+gem 'activemerchant'
 
 # Testing
 group :test do

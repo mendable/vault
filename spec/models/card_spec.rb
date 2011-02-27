@@ -11,7 +11,6 @@ describe Card do
   it { should have_db_column(:created_at).of_type(:datetime) }
   it { should have_db_column(:updated_at).of_type(:datetime) }
 
-  it { should validate_presence_of(:number) }
   it { should validate_presence_of(:month) }
   it { should validate_presence_of(:year) }
 
@@ -113,6 +112,38 @@ describe Card do
       @card.valid?
       @card.errors[:start_year].should be_empty
       @card.errors[:start_month].should be_empty
+    end
+  end
+
+  context "number and real_number" do
+    specify "should validate presence of real_number" do
+      @card = Card.new(:number => nil)
+      @card.valid?
+      @card.errors[:number].should include "Number can't be blank"
+
+      @card.number = '234'
+      @card.valid?
+      @card.errors[:number].should_not include "Number can't be blank"
+    end
+
+    specify "when regular length number is entered, number method never returns it again in full" do
+      @card = Card.new(:number => '1234123412345678')
+      @card.number.should == '************5678'
+      @card.real_number.should == '1234123412345678'
+    end
+
+    specify "when short invalid number is entered, number masking function doesn't break (eg, nil operations during masking)" do
+      @card = Card.new(:number => '12')
+      @card.number.should == '************12'
+      @card.real_number.should == '12'
+    end
+  end
+
+  context "to_xml" do
+    specify "should never include the full credit card number, only the masked" do
+      @card = Card.new(:number => '1111222233334444')
+      @card.to_xml.should_not match /1111222233334444/i
+      @card.to_xml.should match /\*\*\*\*\*\*\*\*\*\*\*\*4444/i
     end
   end
 

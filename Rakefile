@@ -15,9 +15,9 @@ namespace :db do
 
   desc "reset database"
   task(:reset => :environment) do
-    ActiveRecord::Base.connection.execute("DROP DATABASE #{database_config['database']}") rescue nil
-    ActiveRecord::Base.connection.execute("CREATE DATABASE #{database_config['database']}")
-    ActiveRecord::Base.establish_connection(database_config) # borking otherwise
+    ActiveRecord::Base.connection.execute("DROP DATABASE #{DATABASE_CONFIG['database']}") rescue nil
+    ActiveRecord::Base.connection.execute("CREATE DATABASE #{DATABASE_CONFIG['database']}")
+    ActiveRecord::Base.establish_connection(DATABASE_CONFIG) # borking otherwise
     Rake::Task["db:migrate"].invoke
   end
 end

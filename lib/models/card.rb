@@ -1,7 +1,15 @@
 class Card < ActiveRecord::Base
 
+  has_many :charges, :dependent => :nullify
+
   # Number Validations
   validates :issue_number, :numericality => true, :allow_nil => true
+
+  # Name Validations
+  validates :first_name, :last_name, :presence => true
+
+  # IP Address Validations
+  validates :ip_address, :presence => true
 
   # Date Validations
   validates :month, :year, :presence => true, :numericality => true
@@ -67,6 +75,22 @@ class Card < ActiveRecord::Base
   # form. This should never be exposed back to the application in full, ever.
   def real_number
     read_attribute(:number)
+  end
+
+  # Returns this credit card as an instance of ActiveMerchant::Billing::CreditCard.
+  def to_active_merchant(verification_value = nil)
+    ActiveMerchant::Billing::CreditCard.new(
+      :first_name => first_name,
+      :last_name => last_name,
+      :type => ActiveMerchant::Billing::CreditCard.type?(real_number),
+      :number => real_number,
+      :verification_value => verification_value,
+      :month => month,
+      :year => year,
+      :start_month => start_month,
+      :start_year => start_year,
+      :issue_number => issue_number
+    )
   end
 
 end

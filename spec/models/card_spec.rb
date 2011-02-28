@@ -2,14 +2,23 @@ require 'spec_helper'
 
 describe Card do
   it { should have_db_column(:id).of_type(:integer) }
+  it { should have_db_column(:first_name).of_type(:string) }
+  it { should have_db_column(:last_name).of_type(:string) }
   it { should have_db_column(:number).of_type(:string) }
   it { should have_db_column(:month).of_type(:integer) }
   it { should have_db_column(:year).of_type(:integer) }
   it { should have_db_column(:start_month).of_type(:integer) }
   it { should have_db_column(:start_year).of_type(:integer) }
   it { should have_db_column(:issue_number).of_type(:integer) }
+  it { should have_db_column(:ip_address).of_type(:string) }
   it { should have_db_column(:created_at).of_type(:datetime) }
   it { should have_db_column(:updated_at).of_type(:datetime) }
+
+  it { should have_many(:charges).dependent(:nullify) }
+
+  it { should validate_presence_of(:first_name) }
+  it { should validate_presence_of(:last_name) }
+  it { should validate_presence_of(:ip_address) }
 
   it { should validate_presence_of(:month) }
   it { should validate_presence_of(:year) }
@@ -162,6 +171,52 @@ describe Card do
       @card = Card.new(:number => '1111222233334444')
       @card.to_safe_xml.should_not match /1111222233334444/i
       @card.to_safe_xml.should match /\*\*\*\*\*\*\*\*\*\*\*\*4444/i
+    end
+  end
+
+  context "to_active_merchant" do
+    before(:each) do
+      @card = Factory.build(:card, 
+        :first_name => 'FNAME',
+        :last_name => 'LNAME',
+        :number => '12345',
+        :issue_number => '000',
+        :month => '1',
+        :year => '2011',
+        :start_month => '2',
+        :start_year => '2008',
+        :issue_number => '777'
+      )
+    end
+    specify "should instantiate activemerchant credit card with all params" do
+      ActiveMerchant::Billing::CreditCard.should_receive(:type?).once.with(@card.real_number).and_return('master')
+      ActiveMerchant::Billing::CreditCard.should_receive(:new).once.with(
+        :first_name => @card.first_name,
+        :last_name => @card.last_name,
+        :type => 'master',
+        :number => @card.real_number,
+        :verification_value => nil,
+        :month => @card.month,
+        :year => @card.year,
+        :start_month => @card.start_month,
+        :start_year => @card.start_year,
+        :issue_number => @card.issue_number
+      ).and_return('response')
+      @card.to_active_merchant.should == 'response'
+    end
+
+    specify "should also load verification value when passed to to_active_merchant" do
+      cc = @card.to_active_merchant('555')
+      cc.verification_value.should == '555'
+    end
+
+    specify "should really return an instance correctly with factory data" do
+      @card = Factory.build(:card)
+      cc = @card.to_active_merchant('555')
+      cc.should be_an_instance_of ActiveMerchant::Billing::CreditCard
+      # NOTE: potential issue with this, always seems to require CVV or flags as invalid?
+      cc.validate
+      cc.valid?.should == true
     end
   end
 

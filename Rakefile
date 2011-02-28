@@ -1,14 +1,9 @@
 require 'rspec/core/rake_task'
 require File.expand_path(File.dirname(__FILE__) + "/config/boot")
 
-db = File.dirname(__FILE__) + '/config/database.yml'
-databases = YAML.load(File.read(db))
-database_config = databases[settings.environment.to_s]
-
 task :environment do
-  ActiveRecord::Base.establish_connection(database_config)
+  # Any tasks required to setup environment.
 end
-
 
 namespace :db do
   desc "Migrate the database"

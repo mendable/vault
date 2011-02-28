@@ -11,10 +11,6 @@ module Vault
 
     before do
       content_type 'application/xml', :charset => 'utf-8'
-
-      db = File.dirname(__FILE__) + '/../config/database.yml'
-      db_params = YAML.load(File.read(db))[settings.environment.to_s]
-      ActiveRecord::Base.establish_connection(db_params)
     end
 
     not_found do

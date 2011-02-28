@@ -10,6 +10,10 @@ db = File.dirname(__FILE__) + '/../config/database.yml'
 db_params = YAML.load(File.read(db))[ENV['RACK_ENV']]
 ActiveRecord::Base.establish_connection(db_params)
 
+# Setup ActiveMerchant environment
+if ENV['RACK_ENV'] != 'production' then
+  ActiveMerchant::Billing::Base.mode = :test
+end
 
 Dir["./lib/**/*.rb"].each { |f| require f }
 

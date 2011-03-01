@@ -5,13 +5,13 @@ gem 'builder'
 
 # ActiveRecord with UTF-8 MySQL driver
 gem 'sam-mysql-ruby'
-gem 'activerecord', :require => 'active_record'
-gem 'activeresource', :require => 'active_resource'
+gem 'activerecord', '~> 3.0', :require => 'active_record'
+gem 'activeresource', '~> 3.0', :require => 'active_resource'
 gem 'activemerchant'
 
 # Testing
 group :test do
-  gem 'activesupport', :require => 'active_support'
+  gem 'activesupport', '~> 3.0', :require => 'active_support'
   gem 'rspec'
   gem 'shoulda'
   gem 'factory_girl'

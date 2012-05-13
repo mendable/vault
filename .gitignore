@@ -1,3 +1,4 @@
 *.lock
 *.log
 config/*.yml
+config/templates/paypal.yml
